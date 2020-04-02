@@ -1,0 +1,256 @@
+信息系统与数据库技术练习5答题卡
+
+班级：     信管一班 		
+姓名：     李明杰
+学号：     20190307130
+
+注：请将答案放置在序号下方。*/
+
+（二）
+1.
+CREATE DATABASE BookShop
+ON
+(
+NAME=shop2,
+FILENAME='D:\练习5\shop1.MDF',
+SIZE=5,
+MAXSIZE=50,
+FILEGROWTH=2
+)
+LOG ON
+(
+NAME=Shoplog2,
+FILENAME='D:\练习5\Shoplog1.LDF',
+SIZE=5,
+MAXSIZE=50,
+FILEGROWTH=2)
+
+
+2.
+CREATE DATABASE Travel
+ON
+(
+NAME=Travel2,
+FILENAME='D:\练习5\Travel1.MDF',
+SIZE=6,
+MAXSIZE=UNLIMITED,
+FILEGROWTH=10%
+),
+(
+NAME=Travel4,
+FILENAME='D:\练习5\Travel3.LDF',
+SIZE=6,
+MAXSIZE=UNLIMITED,
+FILEGROWTH=10%
+)
+LOG ON
+(
+NAME=Travellog2,
+FILENAME='D:\练习5\Travellog1.LDF',
+SIZE=6,
+MAXSIZE=UNLIMITED,
+FILEGROWTH=10%
+)
+
+
+3.
+CREATE DATABASE Warehouse
+ON
+(
+NAME=Warehouse2,
+FILENAME='D:\练习5\Warehouse1.MDF',
+SIZE=8,
+MAXSIZE=80,
+FILEGROWTH=15%
+),
+FILEGROUP grp
+(
+NAME=Warehouse4,
+FILENAME='D:\练习5\TWarehouse3.LDF',
+SIZE=8,
+MAXSIZE=80,
+FILEGROWTH=15%
+)
+LOG ON
+(
+NAME=Warehouselog2,
+FILENAME='D:\练习5\Warehouselog1.LDF',
+SIZE=8,
+MAXSIZE=80,
+FILEGROWTH=15%
+)
+
+
+
+（三）
+
+/*==============================================================*/
+/* DBMS name:      Microsoft SQL Server 2012                    */
+/* Created on:     2020/4/2 18:03:35                            */
+/*==============================================================*/
+
+
+if exists (select 1
+   from sys.sysreferences r join sys.sysobjects o on (o.id = r.constid and o.type = 'F')
+   where r.fkeyid = object_id('任职') and o.name = 'FK_任职_RELATIONS_职工')
+alter table 任职
+   drop constraint FK_任职_RELATIONS_职工
+go
+
+if exists (select 1
+   from sys.sysreferences r join sys.sysobjects o on (o.id = r.constid and o.type = 'F')
+   where r.fkeyid = object_id('任职') and o.name = 'FK_任职_RELATIONS_职称职务')
+alter table 任职
+   drop constraint FK_任职_RELATIONS_职称职务
+go
+
+if exists (select 1
+   from sys.sysreferences r join sys.sysobjects o on (o.id = r.constid and o.type = 'F')
+   where r.fkeyid = object_id('职工') and o.name = 'FK_职工_分工_部门')
+alter table 职工
+   drop constraint FK_职工_分工_部门
+go
+
+if exists (select 1
+            from  sysindexes
+           where  id    = object_id('任职')
+            and   name  = 'Relationship_4_FK'
+            and   indid > 0
+            and   indid < 255)
+   drop index 任职.Relationship_4_FK
+go
+
+if exists (select 1
+            from  sysindexes
+           where  id    = object_id('任职')
+            and   name  = 'Relationship_3_FK'
+            and   indid > 0
+            and   indid < 255)
+   drop index 任职.Relationship_3_FK
+go
+
+if exists (select 1
+            from  sysobjects
+           where  id = object_id('任职')
+            and   type = 'U')
+   drop table 任职
+go
+
+if exists (select 1
+            from  sysindexes
+           where  id    = object_id('职工')
+            and   name  = '分工_FK'
+            and   indid > 0
+            and   indid < 255)
+   drop index 职工.分工_FK
+go
+
+if exists (select 1
+            from  sysobjects
+           where  id = object_id('职工')
+            and   type = 'U')
+   drop table 职工
+go
+
+if exists (select 1
+            from  sysobjects
+           where  id = object_id('职称职务')
+            and   type = 'U')
+   drop table 职称职务
+go
+
+if exists (select 1
+            from  sysobjects
+           where  id = object_id('部门')
+            and   type = 'U')
+   drop table 部门
+go
+
+/*==============================================================*/
+/* Table: 任职                                                    */
+/*==============================================================*/
+create table 任职 (
+   职工号                  char(8)              not null,
+   代号                   char(5)              not null,
+   任职日期                 datetime             null,
+   constraint PK_任职 primary key (职工号, 代号)
+)
+go
+
+/*==============================================================*/
+/* Index: Relationship_3_FK                                     */
+/*==============================================================*/
+create index Relationship_3_FK on 任职 (
+职工号 ASC
+)
+go
+
+/*==============================================================*/
+/* Index: Relationship_4_FK                                     */
+/*==============================================================*/
+create index Relationship_4_FK on 任职 (
+代号 ASC
+)
+go
+
+/*==============================================================*/
+/* Table: 职工                                                    */
+/*==============================================================*/
+create table 职工 (
+   职工号                  char(8)              not null,
+   部门号                  char(6)              null,
+   姓名                   varchar(12)          null,
+   性别                   char(2)              null,
+   年龄                   int                  null,
+   工资                   money                null,
+   constraint PK_职工 primary key nonclustered (职工号)
+)
+go
+
+/*==============================================================*/
+/* Index: 分工_FK                                                 */
+/*==============================================================*/
+create index 分工_FK on 职工 (
+部门号 ASC
+)
+go
+
+/*==============================================================*/
+/* Table: 职称职务                                                  */
+/*==============================================================*/
+create table 职称职务 (
+   代号                   char(5)              not null,
+   名称                   varchar(10)          null,
+   津贴                   money                null,
+   面积                   numeric(20,2)        null,
+   constraint PK_职称职务 primary key nonclustered (代号)
+)
+go
+
+/*==============================================================*/
+/* Table: 部门                                                    */
+/*==============================================================*/
+create table 部门 (
+   部门号                  char(6)              not null,
+   部门名称                 varchar(20)          null,
+   电话                   varchar(11)          null,
+   负责人                  varchar(8)           null,
+   constraint PK_部门 primary key nonclustered (部门号)
+)
+go
+
+alter table 任职
+   add constraint FK_任职_RELATIONS_职工 foreign key (职工号)
+      references 职工 (职工号)
+go
+
+alter table 任职
+   add constraint FK_任职_RELATIONS_职称职务 foreign key (代号)
+      references 职称职务 (代号)
+go
+
+alter table 职工
+   add constraint FK_职工_分工_部门 foreign key (部门号)
+      references 部门 (部门号)
+go
+
